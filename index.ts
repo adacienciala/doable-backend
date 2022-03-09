@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import * as emailValidator from 'email-validator'
 import * as bcrypt from 'bcrypt'
 import * as hash from 'password-hash'
-import * as cors from 'cors'
+import cors from 'cors'
 import { uuidv4} from 'uuid'
 
 dotenv.config()
@@ -69,7 +69,7 @@ async function connectToDb(): Promise<{
       tokenTimestamp: Date.now(),
       tokenSelector: tokenSelector
     }})
-    res.json({success: true, token: token, selector: tokenSelector});
+    res.json({token: token, selector: tokenSelector});
   });
   
   const PORT = process.env.PORT || 3000;
