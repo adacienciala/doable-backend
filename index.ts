@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import * as emailValidator from 'email-validator'
 import * as bcrypt from 'bcrypt'
 import * as hash from 'password-hash'
+import * as cors from 'cors'
 import { uuidv4} from 'uuid'
 
 dotenv.config()
@@ -26,6 +27,7 @@ async function connectToDb(): Promise<{
   if (err || !db) throw err;
   
   const app = express();
+  app.use(cors());
   app.use(express.json());
   
   app.get('/', (req, res) => {
