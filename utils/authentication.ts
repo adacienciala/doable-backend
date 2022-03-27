@@ -1,6 +1,6 @@
 import { Db, ObjectId } from "mongodb";
 import { v4 as uuidv4 } from "uuid";
-import * as hash from "password-hash";
+import * as bcrypt from "bcrypt";
 
 export async function generateUniqueId(db: Db) {
   while (true) {
@@ -12,13 +12,13 @@ export async function generateUniqueId(db: Db) {
   }
 }
 
-export async function generateToken(
+export async function updateToken(
   db: Db,
-  userId: ObjectId
-): Promise<{ token: String; tokenSelector: String }> {
-  let token = uuidv4();
-  let tokenSelector = uuidv4();
-  const hashedToken = hash.generate(token);
+  userId: ObjectId,
+  token: string,
+  tokenSelector: string
+): Promise<boolean> {
+  const hashedToken = await bcrypt.hash(token, 10);
   const { acknowledged } = await db.collection("accounts").updateOne(
     { _id: userId },
     {
@@ -29,9 +29,5 @@ export async function generateToken(
       },
     }
   );
-  if (!acknowledged) {
-    token = null;
-    tokenSelector = null;
-  }
-  return { token, tokenSelector };
+  return acknowledged;
 }

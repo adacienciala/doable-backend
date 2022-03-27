@@ -1,7 +1,8 @@
 import * as emailValidator from "email-validator";
 import * as bcrypt from "bcrypt";
 import { Db } from "mongodb";
-import { generateToken, generateUniqueId } from "../utils/authentication";
+import { updateToken, generateUniqueId } from "../utils/authentication";
+import { v4 as uuidv4 } from "uuid";
 
 export const login = async (req, res) => {
   const db = req.app.get("db") as Db;
@@ -29,9 +30,11 @@ export const login = async (req, res) => {
       msg: "incorrect password",
     });
   }
-  const { token, tokenSelector } = await generateToken(db, user._id);
-  if (!token) {
-    res.status(400).json({ msg: "user not created" });
+  let token = uuidv4();
+  let tokenSelector = uuidv4();
+  const success = await updateToken(db, user._id, token, tokenSelector);
+  if (!success) {
+    res.status(400).json({ msg: "token not available" });
   }
 
   res.json({ token: token, selector: tokenSelector });
@@ -65,6 +68,9 @@ export const signup = async (req, res) => {
       msg: "email already in use",
     });
   }
+  const token = uuidv4();
+  const tokenSelector = uuidv4();
+  const hashedToken = await bcrypt.hash(token, 10);
   const hashedPassoword = await bcrypt.hash(req.body.password, 10);
   const doableId = await generateUniqueId(db);
   const newUser = {
@@ -73,24 +79,17 @@ export const signup = async (req, res) => {
     password: hashedPassoword,
     name: req.body.name,
     surname: req.body.surname,
-    tokenSelector: null,
-    token: null,
-    tokenTimestamp: null,
+    token: hashedToken,
+    tokenSelector: tokenSelector,
+    tokenTimestamp: Date.now(),
   };
 
-  const { acknowledged, insertedId } = await db
-    .collection("accounts")
-    .insertOne(newUser);
+  const { acknowledged } = await db.collection("accounts").insertOne(newUser);
   if (!acknowledged) {
     return res.status(400).json({
       msg: "user not created",
     });
   }
 
-  const { token, tokenSelector } = await generateToken(db, insertedId);
-  if (!token) {
-    return res.status(400).json({ msg: "update padl lol" });
-  }
-
-  res.json({ token: token, selector: tokenSelector });
+  res.json({ token, tokenSelector });
 };
