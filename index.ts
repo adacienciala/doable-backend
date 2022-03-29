@@ -1,7 +1,7 @@
-import { Db, MongoClient } from "mongodb";
-import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import { Db, MongoClient } from "mongodb";
 import { login, signup } from "./api/authentication";
 
 dotenv.config();
@@ -23,7 +23,7 @@ async function connectToDb(): Promise<{
 (async () => {
   const { err, db } = await connectToDb();
 
-  if (err || !db) throw err;
+  if (err) throw err;
 
   const app = express();
   app.use(cors());
