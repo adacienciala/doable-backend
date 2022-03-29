@@ -30,8 +30,8 @@ export const login = async (req, res) => {
       msg: "incorrect password",
     });
   }
-  let token = uuidv4();
-  let tokenSelector = uuidv4();
+  const token = uuidv4();
+  const tokenSelector = uuidv4();
   const success = await updateToken(db, user._id, token, tokenSelector);
   if (!success) {
     return res.status(400).json({ msg: "token not available" });
