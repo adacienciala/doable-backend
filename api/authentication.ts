@@ -1,8 +1,8 @@
-import * as emailValidator from "email-validator";
 import * as bcrypt from "bcrypt";
+import * as emailValidator from "email-validator";
 import { Db } from "mongodb";
-import { updateToken, generateUniqueId } from "../utils/authentication";
 import { v4 as uuidv4 } from "uuid";
+import { generateUniqueId, updateToken } from "../utils/authentication";
 
 export const login = async (req, res) => {
   const db = req.app.get("db") as Db;
@@ -34,7 +34,7 @@ export const login = async (req, res) => {
   let tokenSelector = uuidv4();
   const success = await updateToken(db, user._id, token, tokenSelector);
   if (!success) {
-    res.status(400).json({ msg: "token not available" });
+    return res.status(400).json({ msg: "token not available" });
   }
 
   res.json({ token: token, selector: tokenSelector });
