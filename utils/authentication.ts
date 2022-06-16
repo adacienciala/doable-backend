@@ -1,11 +1,12 @@
-import { Db, ObjectId } from "mongodb";
-import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcrypt";
+import { HydratedDocument } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
+import { IUser, User } from "../models/user";
 
-export async function generateUniqueId(db: Db) {
+export async function generateUniqueId() {
   while (true) {
     const id = uuidv4();
-    const user = await db.collection("accounts").findOne({ doableId: id });
+    const user = await User.findOne({ doableId: id });
     if (!user) {
       return id;
     }
@@ -13,21 +14,13 @@ export async function generateUniqueId(db: Db) {
 }
 
 export async function updateToken(
-  db: Db,
-  userId: ObjectId,
+  user: HydratedDocument<IUser>,
   token: string,
   tokenSelector: string
-): Promise<boolean> {
+): Promise<IUser> {
   const hashedToken = await bcrypt.hash(token, 10);
-  const { acknowledged } = await db.collection("accounts").updateOne(
-    { _id: userId },
-    {
-      $set: {
-        token: hashedToken,
-        tokenTimestamp: Date.now(),
-        tokenSelector: tokenSelector,
-      },
-    }
-  );
-  return acknowledged;
+  user.token = hashedToken;
+  user.tokenTimestamp = Date.now();
+  user.tokenSelector = tokenSelector;
+  return user.save();
 }
