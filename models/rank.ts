@@ -6,10 +6,10 @@ export interface IRank {
   name: string;
 }
 
-const RankScheme = new mongoose.Schema<IRank>({
+const RankSchema = new mongoose.Schema<IRank>({
   minXp: { type: Number, required: true },
   maxXp: { type: Number, required: true },
   name: { type: String, required: true },
 });
 
-export const Rank = mongoose.model<IRank>("Rank", RankScheme, "ranks");
+export const Rank = mongoose.model<IRank>("Rank", RankSchema, "ranks");
