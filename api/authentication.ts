@@ -1,11 +1,11 @@
 import * as bcrypt from "bcrypt";
 import * as emailValidator from "email-validator";
-import { Db } from "mongodb";
 import { v4 as uuidv4 } from "uuid";
+import { Rank } from "../models/rank";
+import { IUser, User } from "../models/user";
 import { generateUniqueId, updateToken } from "../utils/authentication";
 
 export const login = async (req, res) => {
-  const db = req.app.get("db") as Db;
   if (!req.body.email || !req.body.password) {
     return res.status(400).json({
       msg: "missing data",
@@ -16,9 +16,7 @@ export const login = async (req, res) => {
       msg: "invalid email address",
     });
   }
-  const user = await db
-    .collection("accounts")
-    .findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return res.status(400).json({
       msg: "incorrect email",
@@ -32,16 +30,23 @@ export const login = async (req, res) => {
   }
   const token = uuidv4();
   const tokenSelector = uuidv4();
-  const success = await updateToken(db, user._id, token, tokenSelector);
-  if (!success) {
+  const dbUser = await updateToken(user, token, tokenSelector);
+  if (!dbUser) {
     return res.status(400).json({ msg: "token not available" });
   }
 
-  res.json({ token: token, selector: tokenSelector });
+  const userData = {
+    name: dbUser.name,
+    email: dbUser.email,
+    surname: dbUser.surname,
+    settings: dbUser.settings,
+    statistics: dbUser.statistics,
+  };
+
+  res.json({ token, tokenSelector, user: userData });
 };
 
 export const signup = async (req, res) => {
-  const db = req.app.get("db") as Db;
   const requiredFields = ["email", "password", "name", "surname"];
   for (const field of requiredFields) {
     if (!req.body[field]) {
@@ -60,10 +65,8 @@ export const signup = async (req, res) => {
       msg: "incorrect password (min 6 characters including 1 number)",
     });
   }
-  const emailTaken = await db
-    .collection("accounts")
-    .findOne({ email: req.body.email });
-  if (emailTaken) {
+  const user = await User.findOne({ email: req.body.email });
+  if (user) {
     return res.status(400).json({
       msg: "email already in use",
     });
@@ -72,7 +75,14 @@ export const signup = async (req, res) => {
   const tokenSelector = uuidv4();
   const hashedToken = await bcrypt.hash(token, 10);
   const hashedPassoword = await bcrypt.hash(req.body.password, 10);
-  const doableId = await generateUniqueId(db);
+  const doableId = await generateUniqueId();
+  const allRanks = await Rank.find({}).sort({ maxXp: "asc" });
+  if (!allRanks) {
+    return res.status(500).json({
+      msg: "couldn't find ranks",
+    });
+  }
+  const lowestRank = allRanks[0];
   const newUser = {
     doableId: doableId,
     email: req.body.email,
@@ -82,14 +92,25 @@ export const signup = async (req, res) => {
     token: hashedToken,
     tokenSelector: tokenSelector,
     tokenTimestamp: Date.now(),
+    settings: {
+      avatarSeed: req.body.email,
+    },
+    statistics: {
+      xp: 0,
+      maxXp: lowestRank.maxXp,
+      rank: lowestRank.name,
+    },
   };
 
-  const { acknowledged } = await db.collection("accounts").insertOne(newUser);
-  if (!acknowledged) {
-    return res.status(400).json({
-      msg: "user not created",
-    });
-  }
+  const dbUser = await User.create<IUser>(newUser);
 
-  res.json({ token, tokenSelector });
+  const userData = {
+    name: dbUser.name,
+    email: dbUser.email,
+    surname: dbUser.surname,
+    settings: dbUser.settings,
+    statistics: dbUser.statistics,
+  };
+
+  res.json({ token, tokenSelector, user: userData });
 };

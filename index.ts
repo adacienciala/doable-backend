@@ -1,34 +1,31 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { Db, MongoClient } from "mongodb";
+import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
 
 dotenv.config();
 
-async function connectToDb(): Promise<{
-  db: Db | undefined;
-  err: unknown | undefined;
-}> {
+async function connectToDb(): Promise<null | Error> {
   try {
-    const client = await MongoClient.connect(
+    await mongoose.connect(
       `mongodb+srv://Lemon:${process.env.MONGO_PASS}@doable.fqkto.mongodb.net/doable?retryWrites=true&w=majority`
     ); // , { useNewUrlParser: true }
-    return { db: client.db("doable"), err: undefined };
+    const db = mongoose.connection;
+    db.on("error", console.error.bind(console, "MongoDB connection error:"));
+    return null;
   } catch (e) {
-    return { db: undefined, err: e };
+    return e;
   }
 }
 
 (async () => {
-  const { err, db } = await connectToDb();
-
+  const err = await connectToDb();
   if (err) throw err;
 
   const app = express();
   app.use(cors());
   app.use(express.json());
-  app.set("db", db);
 
   app.get("/", (req, res) => {
     res.send("hello there");
