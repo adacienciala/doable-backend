@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
+import { getTasks } from "./api/tasks";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ async function connectToDb(): Promise<null | Error> {
 
   app.post("/login", login);
   app.post("/register", signup);
+  app.get("/tasks", getTasks);
 
   const PORT = process.env.PORT || 3000;
 
