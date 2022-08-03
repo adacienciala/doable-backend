@@ -4,6 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
 import { getTasks } from "./api/tasks";
+import { authCheckMiddleware } from "./utils/authentication";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ async function connectToDb(): Promise<null | Error> {
   const app = express();
   app.use(cors());
   app.use(express.json());
+  app.use(authCheckMiddleware);
 
   app.get("/", (req, res) => {
     res.send("hello there");
