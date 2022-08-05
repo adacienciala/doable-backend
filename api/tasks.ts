@@ -3,12 +3,6 @@ import { addDays, startOfWeek } from "date-fns";
 const firstDayOfWeek = startOfWeek(Date.now(), { weekStartsOn: 1 });
 
 export const getTasks = async (req, res) => {
-  // if (!req.body.token) {
-  //   return res.status(403).json({
-  //     msg: "missing token", // TODO: implement auth middleware on express app
-  //   });
-  // }
-
   return res.json([
     {
       id: 1,

@@ -54,6 +54,12 @@ async function connectToDb(): Promise<null | Error> {
     });
   });
 
+  app.get("*", (_, res) => {
+    return res.status(404).json({
+      msg: "route not found",
+    });
+  });
+
   const PORT = process.env.PORT || 3000;
 
   app.listen(PORT, () => {
