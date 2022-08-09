@@ -13,14 +13,26 @@ export async function generateUniqueId() {
   }
 }
 
-export async function updateToken(
+const MILISECONDS = 1000;
+const SECONDS = 60;
+const MINUTES = 60;
+
+export async function updateSession(
   user: HydratedDocument<IUser>,
   token: string,
   tokenSelector: string
 ): Promise<IUser> {
+  user.sessions.filter((session) => {
+    return (
+      (Date.now() - session.tokenTimestamp) / MILISECONDS / SECONDS / MINUTES <
+      2
+    );
+  });
   const hashedToken = await bcrypt.hash(token, 10);
-  user.token = hashedToken;
-  user.tokenTimestamp = Date.now();
-  user.tokenSelector = tokenSelector;
+  user.sessions.push({
+    token: hashedToken,
+    tokenTimestamp: Date.now(),
+    tokenSelector: tokenSelector,
+  });
   return user.save();
 }

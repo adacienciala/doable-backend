@@ -6,12 +6,22 @@ export interface IUser {
   email: string;
   password: string;
   surname: string;
-  token: string;
-  tokenSelector: string;
-  tokenTimestamp: number;
+  sessions: [IUserSession];
   settings: IUserSettings;
   statistics: IUserStatistics;
 }
+
+export interface IUserSession {
+  token: string;
+  tokenSelector: string;
+  tokenTimestamp: number;
+}
+
+const UserSessionSchema = new mongoose.Schema<IUserSession>({
+  token: { type: String, required: true },
+  tokenSelector: { type: String, required: true },
+  tokenTimestamp: { type: Number, required: true },
+});
 
 export interface IUserSettings {
   avatarSeed: string;
@@ -39,9 +49,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   email: { type: String, required: true },
   password: { type: String, required: true },
   surname: { type: String, required: true },
-  token: { type: String, required: true },
-  tokenSelector: { type: String, required: true },
-  tokenTimestamp: Number,
+  sessions: { type: [UserSessionSchema], required: true },
   settings: UserSettingsSchema,
   statistics: UserStatisticsSchema,
 });
