@@ -3,9 +3,10 @@ import * as emailValidator from "email-validator";
 import { v4 as uuidv4 } from "uuid";
 import { Rank } from "../models/rank";
 import { IUser, User } from "../models/user";
-import { generateUniqueId, updateToken } from "../utils/authentication";
+import { generateUniqueUserId, updateToken } from "../utils/authentication";
 
 export const login = async (req, res) => {
+  console.log("req.body", req.body);
   if (!req.body.email || !req.body.password) {
     return res.status(400).json({
       msg: "missing data",
@@ -43,7 +44,7 @@ export const login = async (req, res) => {
     statistics: dbUser.statistics,
   };
 
-  res.json({ token, tokenSelector, user: userData });
+  res.status(200).json({ token, tokenSelector, user: userData });
 };
 
 export const signup = async (req, res) => {
@@ -75,7 +76,7 @@ export const signup = async (req, res) => {
   const tokenSelector = uuidv4();
   const hashedToken = await bcrypt.hash(token, 10);
   const hashedPassoword = await bcrypt.hash(req.body.password, 10);
-  const doableId = await generateUniqueId();
+  const doableId = await generateUniqueUserId();
   const allRanks = await Rank.find({}).sort({ maxXp: "asc" });
   if (!allRanks) {
     return res.status(500).json({
@@ -112,5 +113,5 @@ export const signup = async (req, res) => {
     statistics: dbUser.statistics,
   };
 
-  res.json({ token, tokenSelector, user: userData });
+  res.status(200).json({ token, tokenSelector, user: userData });
 };

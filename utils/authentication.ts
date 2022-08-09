@@ -4,7 +4,7 @@ import { HydratedDocument } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import { IUser, User } from "../models/user";
 
-export async function generateUniqueId() {
+export async function generateUniqueUserId() {
   while (true) {
     const id = uuidv4();
     const user = await User.findOne({ doableId: id });
@@ -45,6 +45,7 @@ export async function authCheckMiddleware(
       msg: "invalid authorization header",
     });
   }
+
   const [token, tokenSelector] = bearer.replace("Bearer ", "").split(".");
   const user = await User.findOne({ tokenSelector });
   if (!user) {
@@ -58,6 +59,8 @@ export async function authCheckMiddleware(
       msg: "incorrect credentials",
     });
   }
+
+  req.userId = user.id;
 
   next();
 }
