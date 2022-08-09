@@ -1,38 +1,39 @@
-import { addDays, startOfWeek } from "date-fns";
-
-const firstDayOfWeek = startOfWeek(Date.now(), { weekStartsOn: 1 });
+import { ITask, Task } from "../models/task";
+import { generateUniqueTaskId } from "../utils/tasks";
 
 export const getTasks = async (req, res) => {
-  return res.json([
-    {
-      id: 1,
-      title: "TitleMonday",
-      description: "Some description 1",
-      date: addDays(firstDayOfWeek, 0),
-    },
-    {
-      id: 2,
-      title: "TitleWednesday",
-      description: "Some description 2",
-      date: addDays(firstDayOfWeek, 2),
-    },
-    {
-      id: 3,
-      title: "TitleSaturday",
-      description: "Some description 3",
-      date: addDays(firstDayOfWeek, 5),
-    },
-    {
-      id: 4,
-      title: "TitleToday",
-      description: "Some description 1",
-      date: new Date(),
-    },
-    {
-      id: 5,
-      title: "TitleToday",
-      description: "Some description 2",
-      date: new Date(),
-    },
-  ]);
+  const userId = req.userId;
+  const tasks = await Task.find({ owner: { $in: [userId] } });
+  if (!tasks) {
+    return res.status(500).json({
+      msg: "could not find tasks",
+    });
+  }
+
+  return res.json(tasks);
+};
+
+interface AddTaskBody {
+  taskData: ITask;
+}
+
+export const addTask = async (req, res) => {
+  const { taskData }: AddTaskBody = req.body;
+  const userId = req.userId;
+
+  const newTask = {
+    taskId: await generateUniqueTaskId(),
+    title: taskData.title,
+    description: taskData.description,
+    date: taskData.date,
+    xp: taskData.xp ?? 5,
+    owner: [userId],
+    projectId: taskData.projectId,
+    isChallenge: taskData.isChallenge,
+    isDone: taskData.isDone,
+    repeat: taskData.repeat,
+  };
+  const dbTask = await Task.create<ITask>(newTask);
+
+  return res.json(dbTask);
 };
