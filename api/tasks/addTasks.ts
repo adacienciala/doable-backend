@@ -30,5 +30,5 @@ export const addTask = async (req, res) => {
   };
   const dbTask = await Task.create<ITask>(newTask);
 
-  return res.json(dbTask);
+  return res.status(201).json(dbTask);
 };

@@ -9,5 +9,5 @@ export const getTasks = async (req, res) => {
     });
   }
 
-  return res.json(tasks);
+  return res.status(200).json(tasks);
 };
