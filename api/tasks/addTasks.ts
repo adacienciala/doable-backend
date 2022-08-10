@@ -14,7 +14,7 @@ interface AddTaskBody {
 
 export const addTask = async (req, res) => {
   const taskData: AddTaskBody = req.body;
-  const userId = req.userId;
+  const userDoableId = req.userDoableId;
 
   const newTask = {
     taskId: await generateUniqueTaskId(),
@@ -22,7 +22,7 @@ export const addTask = async (req, res) => {
     description: taskData.description,
     date: taskData.date,
     xp: taskData.xp ?? 5,
-    owner: [userId],
+    owner: [userDoableId],
     projectId: taskData.projectId,
     isChallenge: taskData.isChallenge === true,
     isDone: taskData.isDone === true,

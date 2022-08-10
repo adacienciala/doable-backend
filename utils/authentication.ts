@@ -74,7 +74,7 @@ export async function authCheckMiddleware(
     });
   }
 
-  req.userId = user.id;
+  req.userDoableId = user.doableId;
 
   next();
 }
