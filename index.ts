@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
-import { getTasks } from "./api/tasks";
+import { addTask, getTasks } from "./api/tasks";
 import { authCheckMiddleware } from "./utils/authentication";
 
 dotenv.config();
@@ -37,6 +37,7 @@ async function connectToDb(): Promise<null | Error> {
   app.post("/login", login);
   app.post("/register", signup);
   app.get("/tasks", getTasks);
+  app.post("/tasks", addTask);
 
   app.get("*", (_, res) => {
     return res.status(404).json({
