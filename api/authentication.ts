@@ -3,10 +3,9 @@ import * as emailValidator from "email-validator";
 import { v4 as uuidv4 } from "uuid";
 import { Rank } from "../models/rank";
 import { IUser, User } from "../models/user";
-import { generateUniqueUserId, updateToken } from "../utils/authentication";
+import { generateUniqueUserId, updateSession } from "../utils/authentication";
 
 export const login = async (req, res) => {
-  console.log("req.body", req.body);
   if (!req.body.email || !req.body.password) {
     return res.status(400).json({
       msg: "missing data",
@@ -31,7 +30,7 @@ export const login = async (req, res) => {
   }
   const token = uuidv4();
   const tokenSelector = uuidv4();
-  const dbUser = await updateToken(user, token, tokenSelector);
+  const dbUser = await updateSession(user, token, tokenSelector);
   if (!dbUser) {
     return res.status(400).json({ msg: "token not available" });
   }
@@ -84,15 +83,19 @@ export const signup = async (req, res) => {
     });
   }
   const lowestRank = allRanks[0];
-  const newUser = {
+  const newUser: IUser = {
     doableId: doableId,
     email: req.body.email,
     password: hashedPassoword,
     name: req.body.name,
     surname: req.body.surname,
-    token: hashedToken,
-    tokenSelector: tokenSelector,
-    tokenTimestamp: Date.now(),
+    sessions: [
+      {
+        token: hashedToken,
+        tokenSelector: tokenSelector,
+        tokenTimestamp: Date.now(),
+      },
+    ],
     settings: {
       avatarSeed: req.body.email,
     },
