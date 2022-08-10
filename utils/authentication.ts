@@ -23,7 +23,7 @@ export async function updateSession(
   token: string,
   tokenSelector: string
 ): Promise<IUser> {
-  user.sessions.filter((session) => {
+  user.sessions = user.sessions.filter((session) => {
     return (
       (Date.now() - session.tokenTimestamp) / MILISECONDS / SECONDS / MINUTES <
       2
@@ -59,13 +59,17 @@ export async function authCheckMiddleware(
   }
 
   const [token, tokenSelector] = bearer.replace("Bearer ", "").split(".");
-  const user = await User.findOne({ tokenSelector });
+  const user = await User.findOne({
+    "sessions.tokenSelector": tokenSelector,
+  }).select({ doableId: 1, sessions: { $elemMatch: { tokenSelector } } });
+  console.log("user", user);
+  console.log("tokenSelector", tokenSelector);
   if (!user) {
     return res.status(403).json({
       msg: "incorrect credentials",
     });
   }
-  const tokenMatch = await bcrypt.compare(token, user.token);
+  const tokenMatch = await bcrypt.compare(token, user.sessions[0].token);
   if (!tokenMatch) {
     return res.status(403).json({
       msg: "incorrect credentials",
