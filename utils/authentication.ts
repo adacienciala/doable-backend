@@ -62,8 +62,6 @@ export async function authCheckMiddleware(
   const user = await User.findOne({
     "sessions.tokenSelector": tokenSelector,
   }).select({ doableId: 1, sessions: { $elemMatch: { tokenSelector } } });
-  console.log("user", user);
-  console.log("tokenSelector", tokenSelector);
   if (!user) {
     return res.status(403).json({
       msg: "incorrect credentials",
