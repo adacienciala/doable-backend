@@ -4,6 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
 import { addTask, getTasks } from "./api/tasks";
+import { deleteTask } from "./api/tasks/deleteTask";
 import { authCheckMiddleware } from "./utils/authentication";
 
 dotenv.config();
@@ -38,6 +39,7 @@ async function connectToDb(): Promise<null | Error> {
   app.post("/register", signup);
   app.get("/tasks", getTasks);
   app.post("/tasks", addTask);
+  app.delete("/tasks/:taskId", deleteTask);
 
   app.get("*", (_, res) => {
     return res.status(404).json({
@@ -49,5 +51,13 @@ async function connectToDb(): Promise<null | Error> {
 
   app.listen(PORT, () => {
     console.log(`server started at http://localhost:${PORT}`);
+    console.log(
+      app._router.stack
+        .filter((l) => l.route)
+        .map(
+          (l) =>
+            `path: ${l.route.path}, methods: ${JSON.stringify(l.route.methods)}`
+        )
+    );
   });
 })();
