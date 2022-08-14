@@ -14,9 +14,10 @@ export async function generateUniqueUserId() {
   }
 }
 
-const MILISECONDS = 1000;
-const SECONDS = 60;
-const MINUTES = 60;
+const MILISECOND = 1;
+const SECOND = 1000 * MILISECOND;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
 
 export async function updateSession(
   user: HydratedDocument<IUser>,
@@ -24,10 +25,7 @@ export async function updateSession(
   tokenSelector: string
 ): Promise<IUser> {
   user.sessions = user.sessions.filter((session) => {
-    return (
-      (Date.now() - session.tokenTimestamp) / MILISECONDS / SECONDS / MINUTES <
-      2
-    );
+    return (Date.now() - session.tokenTimestamp) / HOUR < 2;
   });
   const hashedToken = await bcrypt.hash(token, 10);
   user.sessions.push({
