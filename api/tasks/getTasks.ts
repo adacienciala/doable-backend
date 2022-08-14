@@ -4,7 +4,7 @@ export const getTasks = async (req, res) => {
   const userDoableId = req.userDoableId;
   const tasks = await Task.find({ owner: userDoableId });
   if (!tasks) {
-    return res.status(500).json({
+    return res.status(404).json({
       msg: "could not find tasks",
     });
   }
