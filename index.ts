@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
 import { addTask, getTasks } from "./api/tasks";
 import { deleteTask } from "./api/tasks/deleteTask";
+import { getSingleTask } from "./api/tasks/getSingleTask";
 import { authCheckMiddleware } from "./utils/authentication";
 
 dotenv.config();
@@ -37,9 +38,11 @@ async function connectToDb(): Promise<null | Error> {
 
   app.post("/login", login);
   app.post("/register", signup);
+
   app.get("/tasks", getTasks);
   app.post("/tasks", addTask);
   app.delete("/tasks/:taskId", deleteTask);
+  app.get("/tasks/:taskId", getSingleTask);
 
   app.get("*", (_, res) => {
     return res.status(404).json({
