@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
 import { addTask, getTasks } from "./api/tasks";
 import { deleteTask } from "./api/tasks/deleteTask";
+import { updateTask } from "./api/tasks/editTask";
 import { getSingleTask } from "./api/tasks/getSingleTask";
 import { authCheckMiddleware } from "./utils/authentication";
 
@@ -43,6 +44,7 @@ async function connectToDb(): Promise<null | Error> {
   app.post("/tasks", addTask);
   app.delete("/tasks/:taskId", deleteTask);
   app.get("/tasks/:taskId", getSingleTask);
+  app.put("/tasks/:taskId", updateTask);
 
   app.get("*", (_, res) => {
     return res.status(404).json({
