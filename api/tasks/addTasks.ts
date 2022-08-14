@@ -1,16 +1,8 @@
+import { TaskData } from ".";
 import { ITask, Task } from "../../models/task";
 import { generateUniqueTaskId } from "../../utils/tasks";
 
-interface AddTaskBody {
-  title: string;
-  description: string;
-  date: Date;
-  xp: number;
-  projectId: string;
-  isChallenge: boolean;
-  isDone: boolean;
-  repeat: string;
-}
+interface AddTaskBody extends TaskData {}
 
 export const addTask = async (req, res) => {
   const taskData: AddTaskBody = req.body;
