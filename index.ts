@@ -8,6 +8,7 @@ import { deleteTask } from "./api/tasks/deleteTask";
 import { updateTask } from "./api/tasks/editTask";
 import { getSingleTask } from "./api/tasks/getSingleTask";
 import { authCheckMiddleware } from "./utils/authentication";
+import { getRanks } from "./utils/ranks";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ async function connectToDb(): Promise<null | Error> {
   app.use(cors());
   app.use(express.json());
   app.use(authCheckMiddleware);
+  app.set("ranks", await getRanks());
 
   app.get("/", (req, res) => {
     res.send("hello there");
