@@ -36,6 +36,7 @@ export const login = async (req, res) => {
   }
 
   const userData = {
+    doableId: dbUser.doableId,
     name: dbUser.name,
     email: dbUser.email,
     surname: dbUser.surname,
@@ -101,6 +102,7 @@ export const signup = async (req, res) => {
     },
     statistics: {
       xp: 0,
+      minXp: lowestRank.minXp,
       maxXp: lowestRank.maxXp,
       rank: lowestRank.name,
     },
@@ -109,6 +111,7 @@ export const signup = async (req, res) => {
   const dbUser = await User.create<IUser>(newUser);
 
   const userData = {
+    doableId: dbUser.doableId,
     name: dbUser.name,
     email: dbUser.email,
     surname: dbUser.surname,

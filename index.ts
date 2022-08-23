@@ -7,6 +7,7 @@ import { addTask, getTasks } from "./api/tasks";
 import { deleteTask } from "./api/tasks/deleteTask";
 import { updateTask } from "./api/tasks/editTask";
 import { getSingleTask } from "./api/tasks/getSingleTask";
+import { getSingleUser } from "./api/users/getSingleUser";
 import { authCheckMiddleware } from "./utils/authentication";
 import { getRanks } from "./utils/ranks";
 
@@ -47,6 +48,8 @@ async function connectToDb(): Promise<null | Error> {
   app.delete("/tasks/:taskId", deleteTask);
   app.get("/tasks/:taskId", getSingleTask);
   app.put("/tasks/:taskId", updateTask);
+
+  app.get("/users/:userId", getSingleUser);
 
   app.get("*", (_, res) => {
     return res.status(404).json({

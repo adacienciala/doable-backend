@@ -33,12 +33,14 @@ const UserSettingsSchema = new mongoose.Schema<IUserSettings>({
 
 export interface IUserStatistics {
   xp: number;
+  minXp: number;
   maxXp: number;
   rank: string;
 }
 
 const UserStatisticsSchema = new mongoose.Schema<IUserStatistics>({
   xp: { type: Number, required: true },
+  minXp: { type: Number, required: true },
   maxXp: { type: Number, required: true },
   rank: { type: String, required: true },
 });
