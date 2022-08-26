@@ -29,6 +29,7 @@ function updateStatistics(
       (rank) =>
         user.statistics.xp >= rank.minXp && user.statistics.xp <= rank.maxXp
     ) || ranks[ranks.length - 1];
+  user.statistics.minXp = newRank.minXp;
   user.statistics.maxXp = newRank.maxXp;
   user.statistics.rank = newRank.name;
 }
