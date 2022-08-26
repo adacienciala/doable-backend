@@ -6,7 +6,7 @@ export interface IUser {
   email: string;
   password: string;
   surname: string;
-  sessions: [IUserSession];
+  sessions: IUserSession[];
   settings: IUserSettings;
   statistics: IUserStatistics;
 }
