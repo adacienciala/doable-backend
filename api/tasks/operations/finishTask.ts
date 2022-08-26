@@ -33,9 +33,6 @@ function updateStatistics(
   user.statistics.rank = newRank.name;
 }
 
-export function isTaskFinished(
-  task: HydratedDocument<ITask>,
-  done: boolean | undefined
-) {
-  return done != undefined && !task.isDone && done;
+export function isTaskFinished(task: HydratedDocument<ITask>, done?: boolean) {
+  return done !== undefined && !task.isDone && done;
 }
