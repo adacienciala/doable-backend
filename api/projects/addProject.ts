@@ -13,6 +13,7 @@ export const addProject = async (req, res) => {
     owner: [userDoableId, ...(projectData.owner ? projectData.owner : [])],
     cover: projectData.cover,
     historyTasksNumber: 0,
+    currentTasksNumber: 0,
   };
   const dbProject = await Project.create<IProject>(newProject);
 

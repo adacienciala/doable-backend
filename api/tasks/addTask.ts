@@ -1,7 +1,10 @@
 import { TaskData } from ".";
 import { ITask, Task } from "../../models/task";
 import { generateUniqueTaskId } from "../../utils/tasks";
-import { updateProjectStatistics } from "../projects/operations/updateProjectStatistics";
+import {
+  updateProjectCurrentStatistics,
+  updateProjectHistoryStatistics,
+} from "../projects/operations/updateProjectStatistics";
 
 interface AddTaskBody extends TaskData {}
 
@@ -10,7 +13,10 @@ export const addTask = async (req, res) => {
   const userDoableId = req.userDoableId;
 
   try {
-    await updateProjectStatistics(1, taskData.projectId);
+    await updateProjectHistoryStatistics(1, taskData.projectId);
+    if (!taskData.isDone) {
+      await updateProjectCurrentStatistics(1, taskData.projectId);
+    }
   } catch (e) {
     if (e.message === "Cannot not update project") {
       return res.status(400).json({ msg: e.message });

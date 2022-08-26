@@ -33,10 +33,10 @@ export const updateTask = async (req, res) => {
     if (taskFinished) {
       await handleTaskFinished(dbTask, userDoableId, req.app.get("ranks"));
     }
-    if (taskChangedProject) {
-      await updateProjectStatistics(-1, oldProjectId);
-      await updateProjectStatistics(1, newProjectId);
-    }
+    await updateProjectStatistics(
+      { taskFinished, projectId: dbTask.projectId },
+      { taskChangedProject, oldProjectId, newProjectId }
+    );
     return res.status(200).json({ task: savedTask, userUpdated: taskFinished });
   } catch (e) {
     if (e instanceof mongoose.Error.DocumentNotFoundError) {

@@ -1,5 +1,8 @@
 import { Task } from "../../models/task";
-import { updateProjectStatistics } from "../projects/operations/updateProjectStatistics";
+import {
+  updateProjectCurrentStatistics,
+  updateProjectHistoryStatistics,
+} from "../projects/operations/updateProjectStatistics";
 
 export const deleteTask = async (req, res) => {
   const taskId = req.params.taskId;
@@ -13,7 +16,10 @@ export const deleteTask = async (req, res) => {
   }
 
   try {
-    await updateProjectStatistics(-1, deletedTask.projectId);
+    await updateProjectHistoryStatistics(-1, deletedTask.projectId);
+    if (!deletedTask.isDone) {
+      await updateProjectCurrentStatistics(-1, deletedTask.projectId);
+    }
   } catch (e) {
     if (e.message === "Cannot not update project") {
       return res.status(400).json({ msg: e.message });
