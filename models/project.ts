@@ -10,7 +10,7 @@ export interface IProject {
 const ProjectSchema = new mongoose.Schema<IProject>({
   projectId: { type: String, required: true },
   name: { type: String, required: true },
-  cover: { type: String, required: true },
+  cover: String,
   owner: [String],
 });
 

@@ -1,4 +1,7 @@
-export * from "./addTasks";
+export * from "./addTask";
+export * from "./deleteTask";
+export * from "./editTask";
+export * from "./getSingleTask";
 export * from "./getTasks";
 
 export interface TaskData {

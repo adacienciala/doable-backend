@@ -3,10 +3,20 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
-import { addTask, getTasks } from "./api/tasks";
-import { deleteTask } from "./api/tasks/deleteTask";
-import { updateTask } from "./api/tasks/editTask";
-import { getSingleTask } from "./api/tasks/getSingleTask";
+import {
+  addProject,
+  deleteProject,
+  getProjects,
+  getSingleProject,
+  updateProject,
+} from "./api/projects";
+import {
+  addTask,
+  deleteTask,
+  getSingleTask,
+  getTasks,
+  updateTask,
+} from "./api/tasks";
 import { getSingleUser } from "./api/users/getSingleUser";
 import { authCheckMiddleware } from "./utils/authentication";
 import { getRanks } from "./utils/ranks";
@@ -48,6 +58,12 @@ async function connectToDb(): Promise<null | Error> {
   app.delete("/tasks/:taskId", deleteTask);
   app.get("/tasks/:taskId", getSingleTask);
   app.put("/tasks/:taskId", updateTask);
+
+  app.get("/projects", getProjects);
+  app.post("/projects", addProject);
+  app.delete("/projects/:projectId", deleteProject);
+  app.get("/projects/:projectId", getSingleProject);
+  app.put("/projects/:projectId", updateProject);
 
   app.get("/users/:userId", getSingleUser);
 
