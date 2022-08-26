@@ -12,12 +12,12 @@ export async function handleTaskFinished(
   if (!user) {
     throw new Error("Cannot find user");
   }
-  updateStatistics(user, task.xp, ranks);
+  updateUserStatistics(user, task.xp, ranks);
   await user.save();
   return true;
 }
 
-function updateStatistics(
+function updateUserStatistics(
   user: HydratedDocument<IUser>,
   xpGained: number,
   ranks: IRank[]

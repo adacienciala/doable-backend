@@ -10,8 +10,9 @@ export const addProject = async (req, res) => {
   const newProject = {
     projectId: await generateUniqueProjectId(),
     name: projectData.name,
-    owner: [userDoableId, ...projectData.owner],
+    owner: [userDoableId, ...(projectData.owner ? projectData.owner : [])],
     cover: projectData.cover,
+    historyTasksNumber: 0,
   };
   const dbProject = await Project.create<IProject>(newProject);
 
