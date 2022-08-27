@@ -1,6 +1,5 @@
 import { User } from "../../../models/user";
 
-// TODO: check when party no members or to no members
 export async function handleLinkingMembers(
   partyId: string,
   oldMembers: string[] = [],
