@@ -7,14 +7,13 @@ export async function handleTaskFinished(
   task: HydratedDocument<ITask>,
   userDoableId: string,
   ranks: IRank[] = []
-): Promise<boolean> {
+) {
   const user = await User.findOne({ doableId: userDoableId });
   if (!user) {
     throw new Error("Cannot find user");
   }
   updateUserStatistics(user, task.xp, ranks);
   await user.save();
-  return true;
 }
 
 function updateUserStatistics(
