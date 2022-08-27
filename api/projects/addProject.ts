@@ -10,7 +10,7 @@ export const addProject = async (req, res) => {
   const newProject = {
     projectId: await generateUniqueProjectId(),
     name: projectData.name,
-    owner: [userDoableId, ...(projectData.owner ? projectData.owner : [])],
+    owner: [userDoableId, ...(projectData.owner ?? [])],
     cover: projectData.cover,
     historyTasksNumber: 0,
     currentTasksNumber: 0,
