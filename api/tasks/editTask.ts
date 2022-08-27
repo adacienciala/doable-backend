@@ -34,6 +34,7 @@ export const updateTask = async (req, res) => {
       await handleTaskFinished(dbTask, userDoableId, req.app.get("ranks"));
     }
     await updateProjectStatistics(
+      userDoableId,
       { taskFinished, projectId: dbTask.projectId },
       { taskChangedProject, oldProjectId, newProjectId }
     );

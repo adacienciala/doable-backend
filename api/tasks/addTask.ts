@@ -13,9 +13,9 @@ export const addTask = async (req, res) => {
   const userDoableId = req.userDoableId;
 
   try {
-    await updateProjectHistoryStatistics(1, taskData.projectId);
+    await updateProjectHistoryStatistics(userDoableId, 1, taskData.projectId);
     if (!taskData.isDone) {
-      await updateProjectCurrentStatistics(1, taskData.projectId);
+      await updateProjectCurrentStatistics(userDoableId, 1, taskData.projectId);
     }
   } catch (e) {
     if (e.message === "Cannot not update project") {

@@ -3,30 +3,32 @@ import { Project } from "../../../models/project";
 import { ITask } from "../../../models/task";
 
 export async function updateProjectStatistics(
+  userDoableId: string,
   { taskFinished, projectId },
   { taskChangedProject, oldProjectId, newProjectId }
 ) {
   if (taskChangedProject) {
-    await updateProjectHistoryStatistics(-1, oldProjectId);
-    await updateProjectHistoryStatistics(1, newProjectId);
-    await updateProjectCurrentStatistics(-1, oldProjectId);
+    await updateProjectHistoryStatistics(userDoableId, -1, oldProjectId);
+    await updateProjectHistoryStatistics(userDoableId, 1, newProjectId);
+    await updateProjectCurrentStatistics(userDoableId, -1, oldProjectId);
     if (!taskFinished) {
-      await updateProjectCurrentStatistics(1, newProjectId);
+      await updateProjectCurrentStatistics(userDoableId, 1, newProjectId);
     }
   } else {
     if (taskFinished) {
-      await updateProjectCurrentStatistics(-1, projectId);
+      await updateProjectCurrentStatistics(userDoableId, -1, projectId);
     }
   }
 }
 
 export async function updateProjectHistoryStatistics(
+  userDoableId: string,
   amount: number,
   projectId?: string
 ) {
   if (!projectId) return;
   const { acknowledged, matchedCount, modifiedCount } = await Project.updateOne(
-    { projectId: projectId },
+    { owner: userDoableId, projectId: projectId },
     { $inc: { historyTasksNumber: amount } }
   );
   if (!acknowledged) {
@@ -38,12 +40,13 @@ export async function updateProjectHistoryStatistics(
 }
 
 export async function updateProjectCurrentStatistics(
+  userDoableId: string,
   amount: number,
   projectId?: string
 ) {
   if (!projectId) return;
   const { acknowledged, matchedCount, modifiedCount } = await Project.updateOne(
-    { projectId: projectId },
+    { owner: userDoableId, projectId: projectId },
     { $inc: { currentTasksNumber: amount } }
   );
   if (!acknowledged) {

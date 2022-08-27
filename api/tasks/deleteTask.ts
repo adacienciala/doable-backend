@@ -16,9 +16,17 @@ export const deleteTask = async (req, res) => {
   }
 
   try {
-    await updateProjectHistoryStatistics(-1, deletedTask.projectId);
+    await updateProjectHistoryStatistics(
+      userDoableId,
+      -1,
+      deletedTask.projectId
+    );
     if (!deletedTask.isDone) {
-      await updateProjectCurrentStatistics(-1, deletedTask.projectId);
+      await updateProjectCurrentStatistics(
+        userDoableId,
+        -1,
+        deletedTask.projectId
+      );
     }
   } catch (e) {
     if (e.message === "Cannot not update project") {
