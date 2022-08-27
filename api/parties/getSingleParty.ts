@@ -8,7 +8,7 @@ export const getSingleParty = async (req, res) => {
     partyId: partyId,
   });
   if (!dbParty) {
-    return res.status(404).json({ msg: "User not found" });
+    return res.status(404).json({ msg: "Party not found" });
   }
   return res.status(200).json(dbParty);
 };
