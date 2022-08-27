@@ -40,6 +40,7 @@ export const login = async (req, res) => {
     name: dbUser.name,
     email: dbUser.email,
     surname: dbUser.surname,
+    partyId: dbUser.partyId,
     settings: dbUser.settings,
     statistics: dbUser.statistics,
   };
@@ -90,6 +91,7 @@ export const signup = async (req, res) => {
     password: hashedPassoword,
     name: req.body.name,
     surname: req.body.surname,
+    partyId: req.body.partyId,
     sessions: [
       {
         token: hashedToken,
@@ -115,6 +117,7 @@ export const signup = async (req, res) => {
     name: dbUser.name,
     email: dbUser.email,
     surname: dbUser.surname,
+    partyId: dbUser.partyId,
     settings: dbUser.settings,
     statistics: dbUser.statistics,
   };

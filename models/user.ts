@@ -6,6 +6,7 @@ export interface IUser {
   email: string;
   password: string;
   surname: string;
+  partyId: string;
   sessions: IUserSession[];
   settings: IUserSettings;
   statistics: IUserStatistics;
@@ -51,6 +52,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   email: { type: String, required: true },
   password: { type: String, required: true },
   surname: { type: String, required: true },
+  partyId: String,
   sessions: { type: [UserSessionSchema], required: true },
   settings: UserSettingsSchema,
   statistics: UserStatisticsSchema,

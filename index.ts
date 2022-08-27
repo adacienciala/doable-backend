@@ -4,6 +4,13 @@ import express from "express";
 import mongoose from "mongoose";
 import { login, signup } from "./api/authentication";
 import {
+  addParty,
+  deleteParty,
+  getParties,
+  getSingleParty,
+  updateParty,
+} from "./api/parties";
+import {
   addProject,
   deleteProject,
   getProjects,
@@ -64,6 +71,12 @@ async function connectToDb(): Promise<null | Error> {
   app.delete("/projects/:projectId", deleteProject);
   app.get("/projects/:projectId", getSingleProject);
   app.put("/projects/:projectId", updateProject);
+
+  app.get("/parties", getParties);
+  app.post("/parties", addParty);
+  app.delete("/parties/:partyId", deleteParty);
+  app.get("/parties/:partyId", getSingleParty);
+  app.put("/parties/:partyId", updateParty);
 
   app.get("/users/:userId", getSingleUser);
 
