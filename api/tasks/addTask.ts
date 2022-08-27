@@ -1,12 +1,31 @@
 import { TaskData } from ".";
 import { ITask, Task } from "../../models/task";
 import { generateUniqueTaskId } from "../../utils/tasks";
+import {
+  updateProjectCurrentStatistics,
+  updateProjectHistoryStatistics,
+} from "../projects/operations/updateProjectStatistics";
 
 interface AddTaskBody extends TaskData {}
 
 export const addTask = async (req, res) => {
   const taskData: AddTaskBody = req.body;
   const userDoableId = req.userDoableId;
+
+  try {
+    await updateProjectHistoryStatistics(userDoableId, 1, taskData.projectId);
+    if (!taskData.isDone) {
+      await updateProjectCurrentStatistics(userDoableId, 1, taskData.projectId);
+    }
+  } catch (e) {
+    if (e.message === "Cannot not update project") {
+      return res.status(400).json({ msg: e.message });
+    }
+    if (e.message === "Cannot find project") {
+      return res.status(400).json({ msg: e.message });
+    }
+    return res.status(500).json({ msg: "Task couldn't be linked to project" });
+  }
 
   const newTask = {
     taskId: await generateUniqueTaskId(),
