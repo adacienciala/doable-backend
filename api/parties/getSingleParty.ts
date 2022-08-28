@@ -1,4 +1,5 @@
 import { Party } from "../../models/party";
+import { Project } from "../../models/project";
 import { User } from "../../models/user";
 
 export const getSingleParty = async (req, res) => {
@@ -11,19 +12,17 @@ export const getSingleParty = async (req, res) => {
   if (!dbParty) {
     return res.status(404).json({ msg: "Party not found" });
   }
-  const members = await User.find({ doableId: dbParty.members });
+  const members = await User.find({ doableId: dbParty.members }).lean();
+  const projects = await Project.find({ party: dbParty.partyId }).lean();
 
   const mappedParty: any = dbParty;
-  mappedParty.members = dbParty.members.map((memberId) => {
-    const member = members.find((m) => m.doableId === memberId);
-    const newMemberData = {
-      name: member?.name,
-      surname: member?.surname,
-      statistics: member?.statistics,
-      settings: member?.settings,
-    };
-    return newMemberData;
-  });
+  mappedParty.members = members.map((member) => ({
+    name: member?.name,
+    surname: member?.surname,
+    statistics: member?.statistics,
+    settings: member?.settings,
+  }));
+  mappedParty.quests = projects;
 
   return res.status(200).json(mappedParty);
 };

@@ -7,10 +7,8 @@ interface UpdatePartyBody extends Partial<IParty> {}
 export const updateParty = async (req, res) => {
   const partyData: UpdatePartyBody = req.body;
   const partyId = req.params.partyId;
-  const userDoableId = req.userDoableId;
   const dbParty = await Party.findOne({
     partyId,
-    members: userDoableId,
   });
   if (!dbParty) {
     return res.status(404).json({ msg: "Party not found" });
