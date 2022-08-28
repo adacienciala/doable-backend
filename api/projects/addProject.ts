@@ -13,15 +13,12 @@ export const addProject = async (req, res) => {
     ,
     ...(projectData.owner ? [projectData.owner] : []),
   ].filter((i) => i);
-  const parties = [
-    ...(userPartyId ? [userPartyId] : []),
-    ...(projectData.party ?? []),
-  ].filter((i) => i);
+  const parties = [...(projectData.party ?? [])].filter((i) => i);
 
   const newProject = {
     projectId: await generateUniqueProjectId(),
     name: projectData.name,
-    owner: owners,
+    owner: parties.length === 0 ? owners : [],
     cover: projectData.cover,
     party: parties,
     historyTasksNumber: 0,
