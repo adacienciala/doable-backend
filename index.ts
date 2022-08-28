@@ -26,6 +26,7 @@ import {
 } from "./api/tasks";
 import { getSingleUser } from "./api/users/getSingleUser";
 import { authCheckMiddleware } from "./utils/authentication";
+import { loggerMiddleware } from "./utils/logger";
 import { getRanks } from "./utils/ranks";
 
 dotenv.config();
@@ -51,6 +52,7 @@ async function connectToDb(): Promise<null | Error> {
   app.use(cors());
   app.use(express.json());
   app.use(authCheckMiddleware);
+  app.use(loggerMiddleware);
   app.set("ranks", await getRanks());
 
   app.get("/", (req, res) => {
