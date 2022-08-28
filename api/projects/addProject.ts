@@ -12,6 +12,7 @@ export const addProject = async (req, res) => {
     name: projectData.name,
     owner: [userDoableId, ...(projectData.owner ?? [])],
     cover: projectData.cover,
+    party: projectData.party,
     historyTasksNumber: 0,
     currentTasksNumber: 0,
   };

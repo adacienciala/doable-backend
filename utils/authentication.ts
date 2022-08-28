@@ -73,6 +73,7 @@ export async function authCheckMiddleware(
   }
 
   req.userDoableId = user.doableId;
+  req.userPartyId = user.partyId;
 
   next();
 }
