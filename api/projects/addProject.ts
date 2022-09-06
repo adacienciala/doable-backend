@@ -6,11 +6,9 @@ interface AddProjectBody extends IProject {}
 export const addProject = async (req, res) => {
   const projectData: AddProjectBody = req.body;
   const userDoableId = req.userDoableId;
-  const userPartyId = req.userPartyId;
 
   const owners = [
     userDoableId,
-    ,
     ...(projectData.owner ? [projectData.owner] : []),
   ].filter((i) => i);
   const parties = [...(projectData.party ?? [])].filter((i) => i);
