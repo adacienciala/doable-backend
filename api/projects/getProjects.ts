@@ -17,8 +17,8 @@ export const getProjects = async (req, res) => {
   const owners: string[] = [];
   const parties: string[] = [];
   mappedProjects.forEach((p) => {
-    owners.push(...(p.owner || []));
-    parties.push(...(p.party || []));
+    owners.push(...(p.owner ?? []));
+    parties.push(...(p.party ?? []));
   });
   const foundOwners = await User.find({ doableId: owners })
     .select({ doableId: 1, name: 1, surname: 1, settings: 1 })
@@ -28,10 +28,10 @@ export const getProjects = async (req, res) => {
     .lean();
 
   mappedProjects.forEach((project) => {
-    const mappedOwners = (project.owner || []).map((ownerId) =>
+    const mappedOwners = (project.owner ?? []).map((ownerId) =>
       foundOwners.find((o) => o.doableId === ownerId)
     );
-    const mappedParties = (project.party || []).map((partyId) =>
+    const mappedParties = (project.party ?? []).map((partyId) =>
       foundParties.find((party) => party.partyId === partyId)
     );
     project.owner = mappedOwners;
