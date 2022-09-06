@@ -10,6 +10,7 @@ import {
   getSingleProject,
   updateProject,
 } from "./api/projects";
+import { getRewards } from "./api/rewards";
 import {
   addTask,
   deleteTask,
@@ -66,6 +67,7 @@ async function connectToDb(): Promise<null | Error> {
   app.put("/projects/:projectId", updateProject);
 
   app.get("/users/:userId", getSingleUser);
+  app.get("/users/:userId/rewards", getRewards);
 
   app.get("*", (_, res) => {
     return res.status(404).json({
