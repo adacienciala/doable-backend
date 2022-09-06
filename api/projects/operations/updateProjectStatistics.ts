@@ -32,7 +32,7 @@ export async function updateProjectHistoryStatistics(
     { $inc: { historyTasksNumber: amount } }
   );
   if (!acknowledged) {
-    throw new Error("Cannot not update project");
+    throw new Error("Cannot update project");
   }
   if (!matchedCount && !modifiedCount) {
     throw new Error("Cannot find project");

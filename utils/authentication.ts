@@ -59,7 +59,11 @@ export async function authCheckMiddleware(
   const [token, tokenSelector] = bearer.replace("Bearer ", "").split(".");
   const user = await User.findOne({
     "sessions.tokenSelector": tokenSelector,
-  }).select({ doableId: 1, sessions: { $elemMatch: { tokenSelector } } });
+  }).select({
+    doableId: 1,
+    partyId: 1,
+    sessions: { $elemMatch: { tokenSelector } },
+  });
   if (!user) {
     return res.status(403).json({
       msg: "incorrect credentials",
@@ -73,6 +77,7 @@ export async function authCheckMiddleware(
   }
 
   req.userDoableId = user.doableId;
+  req.userPartyId = user.partyId;
 
   next();
 }

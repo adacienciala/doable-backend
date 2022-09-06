@@ -4,9 +4,16 @@ import { Task } from "../../models/task";
 export const deleteProject = async (req, res) => {
   const projectId = req.params.projectId;
   const userDoableId = req.userDoableId;
+  const userPartyId = req.userPartyId;
   const deletedProject = await Project.findOneAndDelete({
-    projectId,
-    owner: userDoableId,
+    $and: [
+      {
+        $or: [{ owner: userDoableId }, { party: userPartyId }],
+      },
+      {
+        projectId: projectId,
+      },
+    ],
   });
   if (!deletedProject) {
     return res.status(404).json({ msg: "Project not found" });

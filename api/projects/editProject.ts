@@ -7,9 +7,16 @@ export const updateProject = async (req, res) => {
   const projectData: UpdateProjectBody = req.body;
   const projectId = req.params.projectId;
   const userDoableId = req.userDoableId;
+  const userPartyId = req.userPartyId;
   const dbProject = await Project.findOne({
-    projectId,
-    owner: userDoableId,
+    $and: [
+      {
+        $or: [{ owner: userDoableId }, { party: userPartyId }],
+      },
+      {
+        projectId: projectId,
+      },
+    ],
   });
   if (!dbProject) {
     return res.status(404).json({ msg: "Project not found" });

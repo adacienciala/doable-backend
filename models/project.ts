@@ -5,6 +5,7 @@ export interface IProject {
   name: string;
   cover: string;
   owner: string[];
+  party: string[];
   historyTasksNumber: number;
   currentTasksNumber: number;
 }
@@ -14,6 +15,7 @@ const ProjectSchema = new mongoose.Schema<IProject>({
   name: { type: String, required: true },
   cover: String,
   owner: [String],
+  party: [String],
   historyTasksNumber: Number,
   currentTasksNumber: Number,
 });

@@ -7,11 +7,18 @@ export const addProject = async (req, res) => {
   const projectData: AddProjectBody = req.body;
   const userDoableId = req.userDoableId;
 
+  const owners = [
+    userDoableId,
+    ...(projectData.owner ? [projectData.owner] : []),
+  ].filter((i) => i);
+  const parties = [...(projectData.party ?? [])].filter((i) => i);
+
   const newProject = {
     projectId: await generateUniqueProjectId(),
     name: projectData.name,
-    owner: [userDoableId, ...(projectData.owner ?? [])],
+    owner: parties.length === 0 ? owners : [],
     cover: projectData.cover,
+    party: parties,
     historyTasksNumber: 0,
     currentTasksNumber: 0,
   };
