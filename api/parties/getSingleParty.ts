@@ -17,6 +17,7 @@ export const getSingleParty = async (req, res) => {
 
   const mappedParty: any = dbParty;
   mappedParty.members = members.map((member) => ({
+    doableId: member?.doableId,
     name: member?.name,
     surname: member?.surname,
     statistics: member?.statistics,
