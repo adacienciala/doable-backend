@@ -13,7 +13,9 @@ export const getTasks = async (req, res) => {
   const tasks = await Task.find({
     $or: [{ owner: userDoableId }, { projectId: projectIds }],
     isDone: false,
-  }).lean();
+  })
+    .populate("projectDetails", ["name"])
+    .lean();
   if (!tasks) {
     return res.status(404).json({
       msg: "could not find tasks",
