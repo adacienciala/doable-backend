@@ -76,7 +76,7 @@ export const signup = async (req, res) => {
   const token = uuidv4();
   const tokenSelector = uuidv4();
   const hashedToken = await bcrypt.hash(token, 10);
-  const hashedPassoword = await bcrypt.hash(req.body.password, 10);
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const doableId = await generateUniqueUserId();
   const allRanks = await Rank.find({}).sort({ maxXp: "asc" });
   if (!allRanks) {
@@ -88,7 +88,7 @@ export const signup = async (req, res) => {
   const newUser: IUser = {
     doableId: doableId,
     email: req.body.email,
-    password: hashedPassoword,
+    password: hashedPassword,
     name: req.body.name,
     surname: req.body.surname,
     partyId: req.body.partyId,

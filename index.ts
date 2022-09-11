@@ -25,6 +25,7 @@ import {
   getTasks,
   updateTask,
 } from "./api/tasks";
+import { updateUser } from "./api/users/editUser";
 import { getSingleUser } from "./api/users/getSingleUser";
 import { authCheckMiddleware } from "./utils/authentication";
 import { loggerMiddleware } from "./utils/logger";
@@ -82,6 +83,7 @@ async function connectToDb(): Promise<null | Error> {
   app.put("/parties/:partyId", updateParty);
 
   app.get("/users/:userId", getSingleUser);
+  app.put("/users/:userId", updateUser);
   app.get("/users/:userId/rewards", getRewards);
 
   app.get("*", (_, res) => {
