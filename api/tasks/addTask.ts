@@ -11,11 +11,22 @@ interface AddTaskBody extends TaskData {}
 export const addTask = async (req, res) => {
   const taskData: AddTaskBody = req.body;
   const userDoableId = req.userDoableId;
+  const userPartyId = req.userPartyId;
 
   try {
-    await updateProjectHistoryStatistics(userDoableId, 1, taskData.projectId);
+    await updateProjectHistoryStatistics(
+      userDoableId,
+      userPartyId,
+      1,
+      taskData.projectId
+    );
     if (!taskData.isDone) {
-      await updateProjectCurrentStatistics(userDoableId, 1, taskData.projectId);
+      await updateProjectCurrentStatistics(
+        userDoableId,
+        userPartyId,
+        1,
+        taskData.projectId
+      );
     }
   } catch (e) {
     if (e.message === "Cannot not update project") {

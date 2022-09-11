@@ -7,6 +7,7 @@ import {
 export const deleteTask = async (req, res) => {
   const taskId = req.params.taskId;
   const userDoableId = req.userDoableId;
+  const userPartyId = req.userPartyId;
   const deletedTask = await Task.findOneAndDelete({
     taskId,
     owner: userDoableId,
@@ -18,12 +19,14 @@ export const deleteTask = async (req, res) => {
   try {
     await updateProjectHistoryStatistics(
       userDoableId,
+      userPartyId,
       -1,
       deletedTask.projectId
     );
     if (!deletedTask.isDone) {
       await updateProjectCurrentStatistics(
         userDoableId,
+        userPartyId,
         -1,
         deletedTask.projectId
       );

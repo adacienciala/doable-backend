@@ -4,31 +4,61 @@ import { ITask } from "../../../models/task";
 
 export async function updateProjectStatistics(
   userDoableId: string,
+  userPartyId: string,
   { taskFinished, projectId },
   { taskChangedProject, oldProjectId, newProjectId }
 ) {
   if (taskChangedProject) {
-    await updateProjectHistoryStatistics(userDoableId, -1, oldProjectId);
-    await updateProjectHistoryStatistics(userDoableId, 1, newProjectId);
-    await updateProjectCurrentStatistics(userDoableId, -1, oldProjectId);
+    await updateProjectHistoryStatistics(
+      userDoableId,
+      userPartyId,
+      -1,
+      oldProjectId
+    );
+    await updateProjectHistoryStatistics(
+      userDoableId,
+      userPartyId,
+      1,
+      newProjectId
+    );
+    await updateProjectCurrentStatistics(
+      userDoableId,
+      userPartyId,
+      -1,
+      oldProjectId
+    );
     if (!taskFinished) {
-      await updateProjectCurrentStatistics(userDoableId, 1, newProjectId);
+      await updateProjectCurrentStatistics(
+        userDoableId,
+        userPartyId,
+        1,
+        newProjectId
+      );
     }
   } else {
     if (taskFinished) {
-      await updateProjectCurrentStatistics(userDoableId, -1, projectId);
+      await updateProjectCurrentStatistics(
+        userDoableId,
+        userPartyId,
+        -1,
+        projectId
+      );
     }
   }
 }
 
 export async function updateProjectHistoryStatistics(
   userDoableId: string,
+  userPartyId: string,
   amount: number,
   projectId?: string
 ) {
   if (!projectId) return;
   const { acknowledged, matchedCount, modifiedCount } = await Project.updateOne(
-    { owner: userDoableId, projectId: projectId },
+    {
+      $or: [{ owner: userDoableId }, { party: userPartyId }],
+      projectId: projectId,
+    },
     { $inc: { historyTasksNumber: amount } }
   );
   if (!acknowledged) {
@@ -41,12 +71,16 @@ export async function updateProjectHistoryStatistics(
 
 export async function updateProjectCurrentStatistics(
   userDoableId: string,
+  userPartyId: string,
   amount: number,
   projectId?: string
 ) {
   if (!projectId) return;
   const { acknowledged, matchedCount, modifiedCount } = await Project.updateOne(
-    { owner: userDoableId, projectId: projectId },
+    {
+      $or: [{ owner: userDoableId }, { party: userPartyId }],
+      projectId: projectId,
+    },
     { $inc: { currentTasksNumber: amount } }
   );
   if (!acknowledged) {

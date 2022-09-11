@@ -13,6 +13,7 @@ export const updateTask = async (req, res) => {
   const taskData: UpdateTaskBody = req.body;
   const taskId = req.params.taskId;
   const userDoableId = req.userDoableId;
+  const userPartyId = req.userPartyId;
   const dbTask = await Task.findOne({
     taskId,
     owner: userDoableId,
@@ -35,6 +36,7 @@ export const updateTask = async (req, res) => {
     }
     await updateProjectStatistics(
       userDoableId,
+      userPartyId,
       { taskFinished, projectId: dbTask.projectId },
       { taskChangedProject, oldProjectId, newProjectId }
     );
