@@ -25,6 +25,7 @@ import {
   getTasks,
   updateTask,
 } from "./api/tasks";
+import { deleteUser } from "./api/users/deleteUser";
 import { updateUser } from "./api/users/editUser";
 import { getSingleUser } from "./api/users/getSingleUser";
 import { authCheckMiddleware } from "./utils/authentication";
@@ -84,6 +85,7 @@ async function connectToDb(): Promise<null | Error> {
 
   app.get("/users/:userId", getSingleUser);
   app.put("/users/:userId", updateUser);
+  app.delete("/users/:userId", deleteUser);
   app.get("/users/:userId/rewards", getRewards);
 
   app.get("*", (_, res) => {
