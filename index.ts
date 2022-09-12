@@ -26,7 +26,7 @@ import {
   getTasks,
   updateTask,
 } from "./api/tasks";
-import { deleteUser, getSingleUser, updateUser } from "./api/users";
+import { deleteUser, getSingleUser, getUsers, updateUser } from "./api/users";
 import { authCheckMiddleware } from "./utils/authentication";
 import { loggerMiddleware } from "./utils/logger";
 import { getAllRanks } from "./utils/ranks";
@@ -82,6 +82,7 @@ async function connectToDb(): Promise<null | Error> {
   app.get("/parties/:partyId", getSingleParty);
   app.put("/parties/:partyId", updateParty);
 
+  app.get("/users", getUsers);
   app.get("/users/:userId", getSingleUser);
   app.put("/users/:userId", updateUser);
   app.delete("/users/:userId", deleteUser);
