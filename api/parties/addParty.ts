@@ -11,7 +11,7 @@ export const addParty = async (req, res) => {
 
   const members = [userDoableId, ...(partyData.members ?? [])];
 
-  const users = await User.find({ doableId: { $in: members } });
+  const users = await User.find({ doableId: members });
   if (users.length !== members.length) {
     return res.status(400).json({ msg: "Unknown users in members array" });
   }
@@ -28,6 +28,8 @@ export const addParty = async (req, res) => {
   try {
     for (const user of users) {
       user.partyId = dbParty.partyId;
+      user.statistics.party.xp = 0;
+      user.statistics.party.level = 1;
       await user.save();
     }
     return res.status(201).json(dbParty);
