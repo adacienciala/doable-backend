@@ -45,12 +45,13 @@ export const deleteUser = async (req, res) => {
     owner: userDoableId,
   });
   try {
-    projects.forEach(async (project) => {
-      const filteredOwners = project.owner.filter((o) => o != userDoableId);
+    for (const project of projects) {
+      const filteredOwners = project.owner.filter((o) => o !== userDoableId);
       if (filteredOwners.length + project.party.length === 0) {
         await project.delete();
         const { acknowledged } = await Task.deleteMany({
           projectId: project.projectId,
+          isDone: false,
         });
         if (!acknowledged) {
           return res.status(400).json({
@@ -61,7 +62,7 @@ export const deleteUser = async (req, res) => {
         project.owner = filteredOwners;
         await project.save();
       }
-    });
+    }
   } catch (e) {
     if (e instanceof mongoose.Error.DocumentNotFoundError) {
       return res
@@ -75,17 +76,18 @@ export const deleteUser = async (req, res) => {
 
   const tasks = await Task.find({
     owner: userDoableId,
+    isDone: false,
   });
   try {
-    tasks.forEach(async (task) => {
-      const filteredOwners = task.owner.filter((o) => o != userDoableId);
+    for (const task of tasks) {
+      const filteredOwners = task.owner.filter((o) => o !== userDoableId);
       if (filteredOwners.length === 0) {
         await task.delete();
       } else {
         task.owner = filteredOwners;
         await task.save();
       }
-    });
+    }
   } catch (e) {
     if (e instanceof mongoose.Error.DocumentNotFoundError) {
       return res.status(400).json({ msg: "Not all tasks have been updated" });

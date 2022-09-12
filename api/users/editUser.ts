@@ -5,6 +5,8 @@ import { IUser, User } from "../../models/user";
 
 interface UpdateUserBody extends Partial<IUser> {}
 
+const readOnlyFields = ["sessions", "statistics"];
+
 export const updateUser = async (req, res) => {
   const userData: UpdateUserBody = req.body;
   const userId = req.params.userId;
@@ -20,7 +22,7 @@ export const updateUser = async (req, res) => {
   }
 
   Object.keys(userData).forEach((field) => {
-    if (userData[field] === "") {
+    if (userData[field] === "" || readOnlyFields.includes(field)) {
       delete userData[field];
     }
   });

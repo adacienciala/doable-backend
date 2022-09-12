@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { TaskData } from ".";
+import { Project } from "../../models/project";
 import { Task } from "../../models/task";
 import {
   checkTaskChangedProject,
@@ -14,9 +15,15 @@ export const updateTask = async (req, res) => {
   const taskId = req.params.taskId;
   const userDoableId = req.userDoableId;
   const userPartyId = req.userPartyId;
+  const projects = await Project.find({
+    party: userPartyId,
+  })
+    .select({ projectId: 1 })
+    .lean();
+  const projectsIds = projects.map((p) => p.projectId);
   const dbTask = await Task.findOne({
     taskId,
-    owner: userDoableId,
+    $or: [{ owner: userDoableId }, { projectId: projectsIds }],
   });
   if (!dbTask) {
     return res.status(404).json({ msg: "Task not found" });
@@ -45,13 +52,14 @@ export const updateTask = async (req, res) => {
     if (e instanceof mongoose.Error.DocumentNotFoundError) {
       return res.status(400).json({ msg: "Task has been deleted" });
     }
-    if (e.message === "Cannot find user") {
-      return res.status(400).json({ msg: e.message });
-    }
-    if (e.message === "Cannot not update project") {
-      return res.status(400).json({ msg: e.message });
-    }
-    if (e.message === "Cannot find project") {
+    if (
+      [
+        "Cannot find user",
+        "Cannot not update project",
+        "Cannot find project",
+        "Cannot find task's project",
+      ].includes(e.message)
+    ) {
       return res.status(400).json({ msg: e.message });
     }
     return res.status(500).json({ msg: "Task couldn't be saved" });

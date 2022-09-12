@@ -26,10 +26,10 @@ export const addParty = async (req, res) => {
   const dbParty = await Party.create<IParty>(newParty);
 
   try {
-    users.forEach(async (user) => {
+    for (const user of users) {
       user.partyId = dbParty.partyId;
       await user.save();
-    });
+    }
     return res.status(201).json(dbParty);
   } catch (e) {
     if (e instanceof mongoose.Error.DocumentNotFoundError) {

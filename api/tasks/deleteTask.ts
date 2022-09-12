@@ -1,4 +1,6 @@
+import { Project } from "../../models/project";
 import { Task } from "../../models/task";
+import { User } from "../../models/user";
 import {
   updateProjectCurrentStatistics,
   updateProjectHistoryStatistics,
@@ -8,13 +10,43 @@ export const deleteTask = async (req, res) => {
   const taskId = req.params.taskId;
   const userDoableId = req.userDoableId;
   const userPartyId = req.userPartyId;
+
+  // find projects that belong to user's party
+  const projects = await Project.find({
+    $or: [{ owner: userDoableId }, { party: userPartyId }],
+  })
+    .select({ projectId: 1 })
+    .lean();
+  const projectIds = projects.map((p) => p.projectId);
+
+  // delete user's / party's tasks
   const deletedTask = await Task.findOneAndDelete({
     taskId,
-    owner: userDoableId,
+    $or: [{ owner: userDoableId }, { projectId: projectIds }],
   });
   if (!deletedTask) {
     return res.status(404).json({ msg: "Task not found" });
   }
+
+  // update statistics for owners and user
+
+  const { acknowledged: acknowledgedOwners } = await User.updateMany(
+    { $or: [{ doableId: deletedTask.owner }, { partyId: userPartyId }] },
+    { $inc: { "statistics.tasks.current": -1 } }
+  );
+  if (!acknowledgedOwners) {
+    return res.status(404).json({ msg: "Owners statistics not updated" });
+  }
+
+  const { acknowledged } = await User.updateOne(
+    { doableId: userDoableId },
+    { $inc: { "statistics.tasks.deleted": 1 } }
+  );
+  if (!acknowledged) {
+    return res.status(404).json({ msg: "User statistics not updated" });
+  }
+
+  // update other statistics
 
   try {
     await updateProjectHistoryStatistics(

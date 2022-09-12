@@ -1,4 +1,5 @@
 import { HydratedDocument } from "mongoose";
+import { IProject, Project } from "../../../models/project";
 import { IRank } from "../../../models/rank";
 import { ITask } from "../../../models/task";
 import { IUser, User } from "../../../models/user";
@@ -12,25 +13,58 @@ export async function handleTaskFinished(
   if (!user) {
     throw new Error("Cannot find user");
   }
-  updateUserStatistics(user, task.xp, ranks);
+  updateUserStatisticsPoints(user, task.xp, ranks);
+  if (task.projectId)
+    await updateUserStatisticsParty(user, task.xp, task.projectId);
+  updateUserStatisticsTasks(user);
+
+  const { acknowledged: acknowledgedOwners } = await User.updateMany(
+    { $or: [{ doableId: task.owner }, { partyId: user.partyId }] },
+    { $inc: { "statistics.tasks.current": -1 } }
+  );
+  if (!acknowledgedOwners) {
+    throw new Error("Owners statistics not updated");
+  }
   await user.save();
 }
 
-function updateUserStatistics(
+function updateUserStatisticsPoints(
   user: HydratedDocument<IUser>,
   xpGained: number,
   ranks: IRank[]
 ) {
-  user.statistics.xp += xpGained;
-  if (user.statistics.xp <= user.statistics.maxXp) return;
+  user.statistics.points.xp += xpGained;
+  if (user.statistics.points.xp <= user.statistics.points.maxXp) return;
   const newRank =
     ranks.find(
       (rank) =>
-        user.statistics.xp >= rank.minXp && user.statistics.xp <= rank.maxXp
+        user.statistics.points.xp >= rank.minXp &&
+        user.statistics.points.xp <= rank.maxXp
     ) || ranks[ranks.length - 1];
-  user.statistics.minXp = newRank.minXp;
-  user.statistics.maxXp = newRank.maxXp;
-  user.statistics.rank = newRank.name;
+  user.statistics.points.minXp = newRank.minXp;
+  user.statistics.points.maxXp = newRank.maxXp;
+  user.statistics.points.rank = newRank.name;
+}
+
+async function updateUserStatisticsParty(
+  user: HydratedDocument<IUser>,
+  xpGained: number,
+  taskProjectId: string
+) {
+  const project = await Project.findOne<IProject>({
+    projectId: taskProjectId,
+  });
+  if (!project) {
+    throw new Error("Cannot find task's project");
+  }
+  if (!project.party.includes(user.partyId)) return;
+  user.statistics.party.xp += xpGained;
+  user.statistics.party.level = Math.ceil(user.statistics.party.xp / 100);
+}
+
+function updateUserStatisticsTasks(user: HydratedDocument<IUser>) {
+  user.statistics.tasks.current -= 1;
+  user.statistics.tasks.finished += 1;
 }
 
 export function isTaskFinished(task: HydratedDocument<ITask>, done?: boolean) {

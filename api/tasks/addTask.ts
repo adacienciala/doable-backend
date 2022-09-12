@@ -1,5 +1,6 @@
 import { TaskData } from ".";
 import { ITask, Task } from "../../models/task";
+import { User } from "../../models/user";
 import { generateUniqueTaskId } from "../../utils/tasks";
 import {
   updateProjectCurrentStatistics,
@@ -51,6 +52,22 @@ export const addTask = async (req, res) => {
     repeat: taskData.repeat,
   };
   const dbTask = await Task.create<ITask>(newTask);
+
+  const { acknowledged: acknowledgedOwners } = await User.updateMany(
+    { partyId: userPartyId },
+    { $inc: { "statistics.tasks.current": 1 } }
+  );
+  if (!acknowledgedOwners) {
+    throw new Error("Owners statistics not updated");
+  }
+
+  const { acknowledged } = await User.updateOne(
+    { doableId: userDoableId },
+    { $inc: { "statistics.tasks.created": 1 } }
+  );
+  if (!acknowledged) {
+    return res.status(404).json({ msg: "User statistics not updated" });
+  }
 
   return res.status(201).json(dbTask);
 };

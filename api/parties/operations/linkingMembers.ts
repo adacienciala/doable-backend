@@ -9,20 +9,20 @@ export async function handleLinkingMembers(
   if (newUsers.length !== newMembers.length) {
     throw new Error("Unknown users in members array");
   }
-  const usersToUnlink = oldMembers.filter(
+  const usersLeaving = oldMembers.filter(
     (oldMember) => !newMembers.includes(oldMember)
   );
-  const usersToLink = newMembers.filter(
+  const usersJoining = newMembers.filter(
     (newMember) => !oldMembers.includes(newMember)
   );
 
-  if (usersToUnlink.length > 0) {
+  if (usersLeaving.length > 0) {
     const { acknowledged: acknowledgedUnsubcribe } = await User.updateMany(
-      { doableId: { $in: usersToUnlink } },
+      { doableId: { $in: usersLeaving } },
       {
-        $set: {
-          partyId: "",
-        },
+        "statistics.party.xp": 0,
+        "statistics.party.level": 0,
+        partyId: "",
       }
     );
     if (!acknowledgedUnsubcribe) {
@@ -30,13 +30,13 @@ export async function handleLinkingMembers(
     }
   }
 
-  if (usersToLink.length > 0) {
+  if (usersJoining.length > 0) {
     const { acknowledged, matchedCount, modifiedCount } = await User.updateMany(
-      { doableId: { $in: usersToLink } },
+      { doableId: { $in: usersJoining } },
       {
-        $set: {
-          partyId: partyId,
-        },
+        "statistics.party.xp": 0,
+        "statistics.party.level": 1,
+        partyId: partyId,
       }
     );
     if (!acknowledged) {

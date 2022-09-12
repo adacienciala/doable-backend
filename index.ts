@@ -25,9 +25,7 @@ import {
   getTasks,
   updateTask,
 } from "./api/tasks";
-import { deleteUser } from "./api/users/deleteUser";
-import { updateUser } from "./api/users/editUser";
-import { getSingleUser } from "./api/users/getSingleUser";
+import { deleteUser, getSingleUser, updateUser } from "./api/users";
 import { authCheckMiddleware } from "./utils/authentication";
 import { loggerMiddleware } from "./utils/logger";
 import { getRanks } from "./utils/ranks";

@@ -103,10 +103,22 @@ export const signup = async (req, res) => {
       avatarSeed: req.body.email,
     },
     statistics: {
-      xp: 0,
-      minXp: lowestRank.minXp,
-      maxXp: lowestRank.maxXp,
-      rank: lowestRank.name,
+      points: {
+        xp: 0,
+        minXp: lowestRank.minXp,
+        maxXp: lowestRank.maxXp,
+        rank: lowestRank.name,
+      },
+      party: {
+        xp: 0,
+        level: 0,
+      },
+      tasks: {
+        created: 0,
+        current: 0,
+        deleted: 0,
+        finished: 0,
+      },
     },
   };
 
