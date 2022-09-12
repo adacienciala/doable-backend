@@ -45,6 +45,7 @@ export interface IUserStatistics {
   points: IUserStatisticsPoints;
   party: IUserStatisticsParty;
   tasks: IUserStatisticsTasks;
+  rewards: string[];
 }
 
 const UserSessionSchema = new mongoose.Schema<IUserSession>({
@@ -80,6 +81,7 @@ const UserStatisticsSchema = new mongoose.Schema<IUserStatistics>({
   points: { type: IUserStatisticsPointsSchema, required: true },
   party: { type: IUserStatisticsPartySchema, required: true },
   tasks: { type: IUserStatisticsTasksSchema, required: true },
+  rewards: { type: [String], required: true },
 });
 
 const UserSchema = new mongoose.Schema<IUser>({

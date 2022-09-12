@@ -119,6 +119,7 @@ export const signup = async (req, res) => {
         deleted: 0,
         finished: 0,
       },
+      rewards: [],
     },
   };
 

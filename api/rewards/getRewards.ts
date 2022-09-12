@@ -1,88 +1,89 @@
-const rewardsData = [
-  {
-    rewardId: "1",
-    title: "Finish 10 tasks",
-    description:
-      "Amet proident do Lorem tempor labore quis excepteur commodo commodo consequat velit.",
-    cover: "randomA",
-    progress: 60,
-    rarity: "bronze",
-    popularity: 17968,
-  },
-  {
-    rewardId: "2",
-    title: "Join a party",
-    description:
-      "Non nostrud et laboris aute do sunt cupidatat reprehenderit velit.",
-    cover: "randomB",
-    progress: 100,
-    rarity: "bronze",
-    popularity: 1792,
-  },
-  {
-    rewardId: "3",
-    title: "Keep a 10 day streak",
-    description: "Culpa est consequat amet excepteur sit est.",
-    cover: "randomC",
-    progress: 20,
-    rarity: "silver",
-    popularity: 179,
-  },
-  {
-    rewardId: "4",
-    title: "Get 1st place in your party",
-    description: "Ex cupidatat non cillum commodo do enim sunt duis.",
-    cover: "randomD",
-    progress: 0,
-    rarity: "gold",
-    popularity: 17,
-  },
-  {
-    rewardId: "5",
-    title: "Finish 100 tasks",
-    description:
-      "Amet proident do Lorem tempor labore quis excepteur commodo commodo consequat velit.",
-    cover: "randomA",
-    progress: 60,
-    rarity: "silver",
-    popularity: 17968,
-  },
-  {
-    rewardId: "6",
-    title: "Change a party",
-    description:
-      "Non nostrud et laboris aute do sunt cupidatat reprehenderit velit.",
-    cover: "randomB",
-    progress: 100,
-    rarity: "silver",
-    popularity: 1792,
-  },
-  {
-    rewardId: "7",
-    title: "Keep a 100 day streak",
-    description: "Culpa est consequat amet excepteur sit est.",
-    cover: "randomC",
-    progress: 20,
-    rarity: "gold",
-    popularity: 179,
-  },
-  {
-    rewardId: "8",
-    title: "Get 1st place in all parties",
-    description: "Ex cupidatat non cillum commodo do enim sunt duis.",
-    cover: "randomD",
-    progress: 0,
-    rarity: "gold",
-    popularity: 17,
-  },
-];
+import { HydratedDocument } from "mongoose";
+import { IParty, Party } from "../../models/party";
+import { IReward, Reward } from "../../models/reward";
+import { IUser, User } from "../../models/user";
 
 export const getRewards = async (req, res) => {
-  if (!rewardsData) {
-    return res.status(404).json({
-      msg: "could not find rewards",
-    });
+  const userId = req.userDoableId;
+
+  // get the user info
+
+  const dbUser = await User.findOne({
+    doableId: userId,
+  });
+  if (!dbUser) {
+    return res.status(404).json({ msg: "User not found" });
   }
 
-  return res.status(200).json(rewardsData);
+  // get sorted party members
+
+  let sortedMembers;
+  if (dbUser.partyId) {
+    const dbParty: IParty & { membersDetails: IUser[] } = await Party.findOne({
+      partyId: dbUser.partyId,
+    })
+      .populate("membersDetails")
+      .lean();
+    if (!dbParty) {
+      return res.status(404).json({ msg: "Party not found" });
+    }
+    sortedMembers = dbParty.membersDetails.sort(
+      (m1, m2) => m2.statistics.party.xp - m1.statistics.party.xp
+    );
+  }
+
+  // get all rewards
+
+  const rewards = await Reward.find({}).lean();
+  if (!rewards) {
+    return res.status(404).json({ msg: "Couldn't find rewards" });
+  }
+
+  // updare all and user's rewards progress
+
+  for (const reward of rewards) {
+    const progress = isRewardAchieved(reward, dbUser)
+      ? 1
+      : getRewardProgress(reward, sortedMembers, dbUser);
+    reward.progress = Math.floor(progress * 100);
+  }
+
+  await dbUser.save();
+
+  return res.status(200).json(rewards);
 };
+
+function isRewardAchieved(reward: IReward, user: HydratedDocument<IUser>) {
+  return user.statistics.rewards.some(
+    (rAchieved) => reward.rewardId === rAchieved
+  );
+}
+
+function getRewardProgress(
+  reward: IReward,
+  sortedMembers: IUser[],
+  user: HydratedDocument<IUser>
+) {
+  let progress = 0;
+  if (reward.type === "tasks") {
+    if (reward.value < 0) {
+      progress = user.statistics.tasks.deleted / (reward.value * -1);
+    } else {
+      progress = user.statistics.tasks.finished / reward.value;
+    }
+  } else if (reward.type === "party" && sortedMembers) {
+    if (reward.value === 0) {
+      progress = 1;
+    } else {
+      const place =
+        sortedMembers.findIndex(
+          ({ doableId }: IUser) => doableId === user.doableId
+        ) + 1;
+      progress = place === reward.value ? 1 : 0;
+    }
+  }
+  if (progress === 1 && !user.statistics.rewards.includes(reward.rewardId)) {
+    user.statistics.rewards.push(reward.rewardId);
+  }
+  return progress;
+}
