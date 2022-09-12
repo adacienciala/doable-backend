@@ -17,6 +17,7 @@ import {
   getSingleProject,
   updateProject,
 } from "./api/projects";
+import { getRanks } from "./api/ranks";
 import { getRewards } from "./api/rewards";
 import {
   addTask,
@@ -28,7 +29,7 @@ import {
 import { deleteUser, getSingleUser, updateUser } from "./api/users";
 import { authCheckMiddleware } from "./utils/authentication";
 import { loggerMiddleware } from "./utils/logger";
-import { getRanks } from "./utils/ranks";
+import { getAllRanks } from "./utils/ranks";
 
 dotenv.config();
 
@@ -54,7 +55,7 @@ async function connectToDb(): Promise<null | Error> {
   app.use(express.json());
   app.use(authCheckMiddleware);
   app.use(loggerMiddleware);
-  app.set("ranks", await getRanks());
+  app.set("ranks", await getAllRanks());
 
   app.get("/", (req, res) => {
     res.send("hello there");
@@ -85,6 +86,8 @@ async function connectToDb(): Promise<null | Error> {
   app.put("/users/:userId", updateUser);
   app.delete("/users/:userId", deleteUser);
   app.get("/users/:userId/rewards", getRewards);
+
+  app.get("/ranks", getRanks);
 
   app.get("*", (_, res) => {
     return res.status(404).json({
