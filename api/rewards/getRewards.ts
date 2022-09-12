@@ -34,23 +34,26 @@ export const getRewards = async (req, res) => {
 
   // get all rewards
 
-  const rewards = await Reward.find({}).lean();
+  const rewards = await Reward.find({});
   if (!rewards) {
     return res.status(404).json({ msg: "Couldn't find rewards" });
   }
 
-  // updare all and user's rewards progress
+  let rewardsWithProgress: IReward[] = [];
 
-  for (const reward of rewards) {
-    const progress = isRewardAchieved(reward, dbUser)
+  // updare rewards progress (itself and user's)
+
+  for (let rId = 0; rId < rewards.length; rId += 1) {
+    const progress = isRewardAchieved(rewards[rId], dbUser)
       ? 1
-      : getRewardProgress(reward, sortedMembers, dbUser);
-    reward.progress = Math.floor(progress * 100);
+      : getRewardProgress(rewards[rId], sortedMembers, dbUser);
+    rewardsWithProgress.push(rewards[rId].toObject());
+    rewardsWithProgress[rId].progress = Math.floor(progress * 100);
+    await rewards[rId].save();
   }
-
   await dbUser.save();
 
-  return res.status(200).json(rewards);
+  return res.status(200).json(rewardsWithProgress);
 };
 
 function isRewardAchieved(reward: IReward, user: HydratedDocument<IUser>) {
@@ -60,7 +63,7 @@ function isRewardAchieved(reward: IReward, user: HydratedDocument<IUser>) {
 }
 
 function getRewardProgress(
-  reward: IReward,
+  reward: HydratedDocument<IReward>,
   sortedMembers: IUser[],
   user: HydratedDocument<IUser>
 ) {
@@ -84,6 +87,7 @@ function getRewardProgress(
   }
   if (progress === 1 && !user.statistics.rewards.includes(reward.rewardId)) {
     user.statistics.rewards.push(reward.rewardId);
+    reward.popularity += 1;
   }
   return progress;
 }
