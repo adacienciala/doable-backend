@@ -3,6 +3,7 @@ import { IProject, Project } from "../../../models/project";
 import { IRank } from "../../../models/rank";
 import { ITask } from "../../../models/task";
 import { IUser, User } from "../../../models/user";
+import { mapTaskDifficultyToPoints } from "../../../utils/tasks";
 
 export async function handleTaskFinished(
   task: HydratedDocument<ITask>,
@@ -13,9 +14,10 @@ export async function handleTaskFinished(
   if (!user) {
     throw new Error("Cannot find user");
   }
-  updateUserStatisticsPoints(user, task.xp, ranks);
+  const xpGained = mapTaskDifficultyToPoints(task.difficulty);
+  updateUserStatisticsPoints(user, xpGained, ranks);
   if (task.projectId)
-    await updateUserStatisticsParty(user, task.xp, task.projectId);
+    await updateUserStatisticsParty(user, xpGained, task.projectId);
   updateUserStatisticsTasks(user);
 
   const { acknowledged: acknowledgedOwners } = await User.updateMany(

@@ -44,7 +44,7 @@ export const addTask = async (req, res) => {
     title: taskData.title,
     description: taskData.description,
     date: taskData.date,
-    xp: taskData.xp ?? 5,
+    difficulty: taskData.difficulty ?? "easy",
     owner: [userDoableId],
     projectId: taskData.projectId,
     isChallenge: taskData.isChallenge === true,

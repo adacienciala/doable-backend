@@ -10,3 +10,16 @@ export async function generateUniqueTaskId() {
     }
   }
 }
+
+export function mapTaskDifficultyToPoints(diffculty: string) {
+  switch (diffculty) {
+    case "easy":
+      return 2;
+    case "medium":
+      return 4;
+    case "hard":
+      return 8;
+    default:
+      return 2;
+  }
+}

@@ -8,7 +8,7 @@ export interface TaskData {
   title: string;
   description: string;
   date: Date;
-  xp: number;
+  difficulty: string;
   projectId: string;
   isChallenge: boolean;
   isDone: boolean;

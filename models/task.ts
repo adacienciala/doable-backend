@@ -5,7 +5,7 @@ export interface ITask {
   title: string;
   description: string;
   date: Date;
-  xp: number;
+  difficulty: string;
   owner: string[];
   projectId: string;
   isChallenge: boolean;
@@ -19,7 +19,7 @@ const TaskSchema = new mongoose.Schema<ITask>(
     title: { type: String, required: true },
     description: String,
     date: Date,
-    xp: Number,
+    difficulty: String,
     owner: [String],
     projectId: String,
     isChallenge: Boolean,
