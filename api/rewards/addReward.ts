@@ -13,7 +13,7 @@ export const addReward = async (req, res) => {
     type: rewardData.type,
     value: rewardData.value,
     progress: 0,
-    rarity: rewardData.rarity,
+    difficulty: rewardData.difficulty,
     popularity: 0,
   };
   const dbReward = await Reward.create<IReward>(newReward);

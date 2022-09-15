@@ -7,7 +7,7 @@ export interface IReward {
   type: string;
   value: number;
   progress: number;
-  rarity: string;
+  difficulty: string;
   popularity: number;
 }
 
@@ -18,7 +18,7 @@ const RewardSchema = new mongoose.Schema<IReward>({
   type: { type: String, required: true },
   value: { type: Number, required: true },
   progress: Number,
-  rarity: { type: String, required: true },
+  difficulty: { type: String, required: true },
   popularity: Number,
 });
 
