@@ -135,5 +135,5 @@ export const signup = async (req, res) => {
     statistics: dbUser.statistics,
   };
 
-  res.status(200).json({ token, tokenSelector, user: userData });
+  res.status(201).json({ token, tokenSelector, user: userData });
 };

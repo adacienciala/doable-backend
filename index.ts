@@ -1,7 +1,9 @@
+import * as bcrypt from "bcrypt";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import { Server } from "socket.io";
 import { login, signup } from "./api/authentication";
 import {
   addParty,
@@ -27,6 +29,8 @@ import {
   updateTask,
 } from "./api/tasks";
 import { deleteUser, getSingleUser, getUsers, updateUser } from "./api/users";
+import { IMessage, Message } from "./models/message";
+import { User } from "./models/user";
 import { authCheckMiddleware } from "./utils/authentication";
 import { loggerMiddleware } from "./utils/logger";
 import { getAllRanks } from "./utils/ranks";
@@ -106,7 +110,7 @@ async function connectToDb(): Promise<null | Error> {
 
   const PORT = process.env.PORT || 3000;
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`server started at http://localhost:${PORT}`);
     console.log(
       app._router.stack
@@ -116,5 +120,84 @@ async function connectToDb(): Promise<null | Error> {
             `path: ${l.route.path}, methods: ${JSON.stringify(l.route.methods)}`
         )
     );
+  });
+
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+  console.log("[CHAT] server up");
+
+  io.on("connection", (socket) => {
+    console.log("[CHAT] user connected");
+
+    const socketTimeout = setTimeout(() => {
+      console.log("[CHAT] force disconnect due to inactivity");
+      socket.disconnect(true);
+    }, 1000 * 10);
+
+    socket.on("disconnect", () => {
+      console.log(`[CHAT] user disconnected`);
+    });
+
+    socket.on("authenticate", async (data) => {
+      if (!data || !data.token || !data.tokenSelector) return;
+      const user = await User.findOne({
+        "sessions.tokenSelector": data.tokenSelector,
+      }).select({
+        doableId: 1,
+        partyId: 1,
+        email: 1,
+        sessions: { $elemMatch: { tokenSelector: data.tokenSelector } },
+      });
+      if (!user) {
+        return socket.emit("auth denied", "User not found");
+      }
+      const tokenMatch = await bcrypt.compare(
+        data.token,
+        user.sessions[0].token
+      );
+      if (!tokenMatch) {
+        return socket.emit("auth denied", "Incorect credentials");
+      }
+      const authedUser = user;
+      clearTimeout(socketTimeout);
+      socket.emit("authenticated");
+      console.log(`[CHAT] ${user.email} authenticated`);
+
+      socket.join(user.partyId);
+
+      socket.on("message", async (data) => {
+        console.log(">>>", data);
+        if (!data.partyId || !data.message || !data.userId) return;
+        const newMessage = {
+          partyId: data.partyId,
+          message: data.message,
+          userId: data.userId,
+          date: new Date(),
+        };
+        const dbMessage = await Message.create<IMessage>(newMessage);
+        if (!dbMessage) {
+          console.error(err);
+          return;
+        }
+        console.log("emitting");
+        return io.to(dbMessage.partyId).emit("message", dbMessage);
+      });
+
+      const messagesHistory = await Message.find({
+        partyId: authedUser.partyId,
+      })
+        .sort({ date: 1 })
+        .lean();
+
+      return socket.emit("messages history", messagesHistory);
+    });
+  });
+
+  io.on("cry", ({ data }) => {
+    console.log(">>>>", data);
   });
 })();
