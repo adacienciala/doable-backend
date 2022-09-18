@@ -146,12 +146,16 @@ async function connectToDb(): Promise<null | Error> {
       if (!data || !data.token || !data.tokenSelector) return;
       const user = await User.findOne({
         "sessions.tokenSelector": data.tokenSelector,
-      }).select({
-        doableId: 1,
-        partyId: 1,
-        email: 1,
-        sessions: { $elemMatch: { tokenSelector: data.tokenSelector } },
-      });
+      })
+        .select({
+          doableId: 1,
+          partyId: 1,
+          email: 1,
+          name: 1,
+          surname: 1,
+          sessions: { $elemMatch: { tokenSelector: data.tokenSelector } },
+        })
+        .lean();
       if (!user) {
         return socket.emit("auth denied", "User not found");
       }
@@ -164,10 +168,13 @@ async function connectToDb(): Promise<null | Error> {
       }
       const authedUser = user;
       clearTimeout(socketTimeout);
-      socket.emit("authenticated");
       console.log(`[CHAT] ${user.email} authenticated`);
-
       socket.join(user.partyId);
+      const messagesHistory = await Message.find({
+        partyId: authedUser.partyId,
+      })
+        .sort({ date: 1 })
+        .lean();
 
       socket.on("message", async (data) => {
         console.log(">>>", data);
@@ -184,20 +191,14 @@ async function connectToDb(): Promise<null | Error> {
           return;
         }
         console.log("emitting");
-        return io.to(dbMessage.partyId).emit("message", dbMessage);
+        return io.to(dbMessage.partyId).emit("message", {
+          ...dbMessage.toObject(),
+          userDisplay: `${authedUser.name} ${authedUser.surname}`,
+        });
       });
-
-      const messagesHistory = await Message.find({
-        partyId: authedUser.partyId,
-      })
-        .sort({ date: 1 })
-        .lean();
-
-      return socket.emit("messages history", messagesHistory);
+      return socket.emit("authenticated", messagesHistory);
     });
-  });
 
-  io.on("cry", ({ data }) => {
-    console.log(">>>>", data);
+    return socket.emit("connection");
   });
 })();
