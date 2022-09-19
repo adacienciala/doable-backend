@@ -56,13 +56,16 @@ export const getRewards = async (req, res) => {
   return res.status(200).json(rewardsWithProgress);
 };
 
-function isRewardAchieved(reward: IReward, user: HydratedDocument<IUser>) {
+export function isRewardAchieved(
+  reward: IReward,
+  user: HydratedDocument<IUser>
+) {
   return user.statistics.rewards.some(
     (rAchieved) => reward.rewardId === rAchieved
   );
 }
 
-function getRewardProgress(
+export function getRewardProgress(
   reward: HydratedDocument<IReward>,
   sortedMembers: IUser[],
   user: HydratedDocument<IUser>
@@ -85,7 +88,8 @@ function getRewardProgress(
       progress = place === reward.value ? 1 : 0;
     }
   }
-  if (progress === 1 && !user.statistics.rewards.includes(reward.rewardId)) {
+  progress = progress >= 1 ? 1 : progress;
+  if (progress >= 1 && !user.statistics.rewards.includes(reward.rewardId)) {
     user.statistics.rewards.push(reward.rewardId);
     reward.popularity += 1;
   }
