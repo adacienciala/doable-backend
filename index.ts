@@ -33,6 +33,7 @@ import { IMessage, Message } from "./models/message";
 import { User } from "./models/user";
 import { authCheckMiddleware } from "./utils/authentication";
 import { loggerMiddleware } from "./utils/logger";
+import { generateUniqueMessageId } from "./utils/messages";
 import { getAllRanks } from "./utils/ranks";
 
 dotenv.config();
@@ -143,7 +144,9 @@ async function connectToDb(): Promise<null | Error> {
     });
 
     socket.on("authenticate", async (data) => {
-      if (!data || !data.token || !data.tokenSelector) return;
+      console.log("[CHAT] user authenticating...", data);
+      if (!data || !data.token || !data.tokenSelector || !data.partyId)
+        return socket.emit("auth denied", "Wrong credentials or no partyId");
       const user = await User.findOne({
         "sessions.tokenSelector": data.tokenSelector,
       })
@@ -180,6 +183,7 @@ async function connectToDb(): Promise<null | Error> {
         console.log(">>>", data);
         if (!data.partyId || !data.message || !data.userId) return;
         const newMessage = {
+          messageId: await generateUniqueMessageId(),
           partyId: data.partyId,
           message: data.message,
           userId: data.userId,
